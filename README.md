@@ -3,7 +3,7 @@ A low-dependency tool used to retrieves and injects secrets from AWS SSM Paramet
 
 ## Installation
 ```bash
-$ helm plugin install https://github.com/totango/helm-ssm
+$ helm plugin install https://github.com/rewardinsight/helm-ssm
 ```
 
 ## Overview
