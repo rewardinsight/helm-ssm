@@ -38,6 +38,13 @@ secrets:
   htpasswd: "{{ssm /mgmt/docker-registry/htpasswd us-east-1}}"
 ```
 
+
+##Using a Prefix
+If your SSM parameters have a preset you can specify it at run time using the -p or --prefix flags followed by a string
+
+E.g:
+helm ssm install stable/docker-registry --values value-file1.yaml -f value-file2.yaml -p "/some/prefix/path"
+
 ## Testing
 ```
 $ ./ssm.sh install tests/testchart/ --debug --dry-run -f tests/testchart/values.yaml

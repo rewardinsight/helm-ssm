@@ -40,7 +40,6 @@ Note: You must have IAM access to the parameters you're trying to decrypt, and t
 Note #2: Wrap the template with quotes, otherwise helm will confuse the brackets for json, and will fail rendering.
 Note #3: Currently, helm-ssm does not work when the value of the parameter is in the default chart values.
 
-
 E.g:
 helm ssm install stable/docker-registry --values value-file1.yaml -f value-file2.yaml
 
@@ -50,6 +49,12 @@ secrets:
   haSharedSecret: "{{ssm /mgmt/docker-registry/shared-secret us-east-1}}"
   htpasswd: "{{ssm /mgmt/docker-registry/htpasswd us-east-1}}"
 ---
+
+Prefix:
+If your SSM parameters have a preset you can specify it at run time using the -p or --prefix flags followed by a string
+
+E.g:
+helm ssm install stable/docker-registry --values value-file1.yaml -f value-file2.yaml -p "/some/prefix/path"
 EOF
     exit 0
 }
@@ -87,6 +92,7 @@ fi
 
 VALUE_FILES=() # An array of paths to value files
 OPTIONS=() # An array of all the other options given
+PREFIX="" # prefix to use when fetching SSM Parameters (optional)
 while [[ "$#" -gt 0 ]]
 do
     case "$1" in
@@ -97,6 +103,11 @@ do
     -f|--values)
         if [ $# -gt 1 ]; then # if we werent given just an empty '-f' option
             VALUE_FILES+=($2) # then add the path to the array
+        fi
+        ;;
+    -p|--prefix)
+        if [ $# -gt 1 ]; then # if we werent given just an empty '-p' option
+            PREFIX=$2 # then add the path to the array
         fi
         ;;
     *)
@@ -112,6 +123,10 @@ done
 
 echo -e "${GREEN}[SSM]${NOC} Options: ${OPTIONS[@]}"
 echo -e "${GREEN}[SSM]${NOC} Value files: ${VALUE_FILES[@]}"
+
+if [[ ! -f ${PREFIX} ]]; then
+    echo -e "${GREEN}[SSM]${NOC} Prefix: ${PREFIX}"
+fi
 
 set +e # we disable fail-dast because we want to give the user a proper error message in case we cant read the value file
 MERGED_TEXT=""
@@ -154,6 +169,10 @@ while read -r PARAM_STRING; do
     CLEANED_PARAM_STRING=$(echo ${PARAM_STRING:2} | rev | cut -c 3- | rev) # we cut the '{{' and '}}' at the beginning and end
     PARAM_PATH=$(echo ${CLEANED_PARAM_STRING:2} | cut -d' ' -f 2) # {{ssm */param/path* us-east-1}}
     REGION=$(echo ${CLEANED_PARAM_STRING:2} | cut -d' ' -f 3) # {{ssm /param/path *us-east-1*}}
+
+    if [[ ! -f ${PREFIX} ]]; then
+        PARAM_PATH="${PREFIX}${PARAM_PATH}"
+    fi
     
 
     PARAM_OUTPUT="$(aws ssm get-parameter --with-decryption --name ${PARAM_PATH} --output text --query Parameter.Value --region ${REGION} 2>&1)" # Get the parameter value or error message
