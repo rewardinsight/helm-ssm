@@ -111,9 +111,9 @@ do
         fi
         ;;
     *)
-        # we go over each options, and if the option isnt a value file, we add it to the options array
+        # we go over each options, and if the option isnt a value file or prefix, we add it to the options array
         set +e # we turn off fast-fail because the check of if the array contains a value returns exit code 0 or 1 depending on the result
-        elementIn "$1" "${VALUE_FILES[@]}"
+        elementIn "$1" "${VALUE_FILES[@]}" | "$1" == ${PREFIX}
         [[ $? -eq 1 ]] && OPTIONS+=($1)
         set -e # when we're finished with the check, we turn on fast-fail
         ;;
