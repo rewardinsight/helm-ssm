@@ -93,6 +93,7 @@ fi
 VALUE_FILES=() # An array of paths to value files
 OPTIONS=() # An array of all the other options given
 PREFIX="" # prefix to use when fetching SSM Parameters (optional)
+GLOBAL_REGION="" # region override to use when fetching SSM Parameters (optional)
 while [[ "$#" -gt 0 ]]
 do
     case "$1" in
@@ -108,6 +109,11 @@ do
     -p|--prefix)
         if [ $# -gt 1 ]; then # if we werent given just an empty '-p' option
             PREFIX=$2 # then add the path to the array
+        fi
+        ;;
+    -r|--region)
+        if [ $# -gt 1 ]; then # if we werent given just an empty '-r' option
+            GLOBAL_REGION=$2 # then add the path to the array
         fi
         ;;
     *)
@@ -128,6 +134,10 @@ echo -e "${GREEN}[SSM]${NOC} Value files: ${VALUE_FILES[@]}"
 
 if [[ ! -f ${PREFIX} ]]; then
     echo -e "${GREEN}[SSM]${NOC} Prefix: ${PREFIX}"
+fi
+
+if [[ ! -f ${GLOBAL_REGION} ]]; then
+    echo -e "${GREEN}[SSM]${NOC} Region: ${GLOBAL_REGION}"
 fi
 
 set +e # we disable fail-dast because we want to give the user a proper error message in case we cant read the value file
@@ -170,12 +180,18 @@ while read -r PARAM_STRING; do
 
     CLEANED_PARAM_STRING=$(echo ${PARAM_STRING:2} | rev | cut -c 3- | rev) # we cut the '{{' and '}}' at the beginning and end
     PARAM_PATH=$(echo ${CLEANED_PARAM_STRING:2} | cut -d' ' -f 2) # {{ssm */param/path* us-east-1}}
-    REGION=$(echo ${CLEANED_PARAM_STRING:2} | cut -d' ' -f 3) # {{ssm /param/path *us-east-1*}}
+
+    if [[ ! -f ${GLOBAL_REGION} ]]; then
+        REGION=${GLOBAL_REGION} # Use region provided to cli
+    else
+        REGION=$(echo ${CLEANED_PARAM_STRING:2} | cut -d' ' -f 3) # {{ssm /param/path *us-east-1*}}
+    fi
+
 
     if [[ ! -f ${PREFIX} ]]; then
         PARAM_PATH="${PREFIX}${PARAM_PATH}"
     fi
-    
+
 
     PARAM_OUTPUT="$(aws ssm get-parameter --with-decryption --name ${PARAM_PATH} --output text --query Parameter.Value --region ${REGION} 2>&1)" # Get the parameter value or error message
     EXIT_CODE=$?

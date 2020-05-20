@@ -45,6 +45,13 @@ If your SSM parameters have a preset you can specify it at run time using the -p
 E.g:
 helm ssm install stable/docker-registry --values value-file1.yaml -f value-file2.yaml -p "/some/prefix/path"
 
+##Overriding the region
+If your wantr to globally override the region setting given in each param string you can specify it at run time using 
+the -r or --region flags followed by a region string e.g. eu-west-1
+
+E.g:
+helm ssm install stable/docker-registry --values value-file1.yaml -f value-file2.yaml -p "/some/prefix/path" -r "eu-west-1"
+
 ## Testing
 ```
 $ ./ssm.sh install tests/testchart/ --debug --dry-run -f tests/testchart/values.yaml
