@@ -117,7 +117,7 @@ do
         fi
         ;;
     *)
-        if [ "$1" != "${PREFIX}" &&  "$1" != "${GLOBAL_REGION}" ]; then
+        if [ "$1" != "${PREFIX}" -a  "$1" != "${GLOBAL_REGION}" ]; then
           # we go over each options, and if the option isnt a value file or prefix, we add it to the options array
           set +e # we turn off fast-fail because the check of if the array contains a value returns exit code 0 or 1 depending on the result
           elementIn "$1" "${VALUE_FILES[@]}"
