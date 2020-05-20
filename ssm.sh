@@ -183,10 +183,8 @@ while read -r PARAM_STRING; do
 
     if [[ -n ${GLOBAL_REGION} ]]; then
         REGION=${GLOBAL_REGION} # Use region provided to cli
-        echo -e "${YELLOW}[SSM] ${NOC} Using global region"
     else
         REGION=$(echo ${CLEANED_PARAM_STRING:2} | cut -d' ' -f 3) # {{ssm /param/path *us-east-1*}}
-        echo -e "${YELLOW}[SSM] ${NOC} Using param region"
     fi
 
 
