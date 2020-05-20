@@ -132,11 +132,11 @@ done
 echo -e "${GREEN}[SSM]${NOC} Options: ${OPTIONS[@]}"
 echo -e "${GREEN}[SSM]${NOC} Value files: ${VALUE_FILES[@]}"
 
-if [[ ! -f ${PREFIX} ]]; then
+if [[ -z ${PREFIX} ]]; then
     echo -e "${GREEN}[SSM]${NOC} Prefix: ${PREFIX}"
 fi
 
-if [[ ! -f ${GLOBAL_REGION} ]]; then
+if [[ -z ${GLOBAL_REGION} ]]; then
     echo -e "${GREEN}[SSM]${NOC} Region: ${GLOBAL_REGION}"
 fi
 
@@ -181,7 +181,7 @@ while read -r PARAM_STRING; do
     CLEANED_PARAM_STRING=$(echo ${PARAM_STRING:2} | rev | cut -c 3- | rev) # we cut the '{{' and '}}' at the beginning and end
     PARAM_PATH=$(echo ${CLEANED_PARAM_STRING:2} | cut -d' ' -f 2) # {{ssm */param/path* us-east-1}}
 
-    if [[ ! -f ${GLOBAL_REGION} ]]; then
+    if [[ -z ${GLOBAL_REGION} ]]; then
         REGION=${GLOBAL_REGION} # Use region provided to cli
     else
         REGION=$(echo ${CLEANED_PARAM_STRING:2} | cut -d' ' -f 3) # {{ssm /param/path *us-east-1*}}
